@@ -27,7 +27,10 @@ func main() {
   //encodeData("03", on_request, on_value)
   //conn := connect()
   //receive(conn)
-  encodeData("03", off_request, off_value)
+  fmt.Println(fmt.Sprintf("%x", len("004F00384B435705")))
+  
+  fmt.Println("-----------------------------------")
+  encodeData(write_return, on_request, on_value)
 }
 
 func connect() *net.UDPConn {
@@ -48,10 +51,14 @@ func connect() *net.UDPConn {
 func send(data string) int {
   conn := connect()
   payload := build_headers() + data
+  fmt.Println("Payload: "+payload)
   payload = HEADER + payload + checksum(payload)
-  bytes, _ := hex.DecodeString(payload)
-  //addr := &net.UDPAddr{Port: 4000, IP: net.ParseIP("192.168.0.88")}
+  bytes, err := hex.DecodeString(payload)
+  if err != nil {
+    log.Fatalf("Could not decode payload: %v", err)
+  }
   res, err := conn.Write(bytes)
+  fmt.Printf("response: %v", res)
   if err != nil {
     log.Fatal(err)
   }
@@ -59,13 +66,14 @@ func send(data string) int {
 }
 
 func receive(conn *net.UDPConn) {
-  buf := make([]byte, 4096)
-  _, err := bufio.NewReader(conn).Read(buf)
+  b := make([]byte, 4096)
+  _, err := bufio.NewReader(conn).Read(b)
+  fmt.Println(b)
 
   if err != nil {
     log.Fatalf("Error reading client: %v", err)
   } else {
-    fmt.Printf("%s\n", buf)
+    fmt.Printf("Buff: %v\n", b)
   }
 
 }
@@ -73,19 +81,22 @@ func receive(conn *net.UDPConn) {
 func build_headers() string {
   id_size := get_size("004F00384B435705")
   pwd_size := get_size("1111")
-  id := hex.EncodeToString([]byte("004F00384B435705"))
-  password := hex.EncodeToString([]byte("1111"))
+  id := fmt.Sprintf("%x", "004F00384B435705")
+  password := fmt.Sprintf("%x", "1111")
   devieType := "02"
-  return fmt.Sprintf("%s%x%x%x%x", devieType, id_size, id, pwd_size, password)
+  return fmt.Sprintf("%s%s%s%s%s", devieType, id_size, id, pwd_size, password)
 }
 
-func get_size(str string) int {
-  res, err := strconv.Atoi(fmt.Sprintf("%02d", hex.EncodedLen(len(str))))
+func get_size(str string) string {
+  encoding := fmt.Sprintf("%x", len(str))
+  res, err := strconv.Atoi(encoding)
   if err != nil {
     log.Fatal(err)
   }
 
-  return res
+  t := fmt.Sprintf("%02d", res)
+
+  return t
 }
 
 func encodeData(operation, param, value string) {
@@ -108,7 +119,7 @@ func encodeData(operation, param, value string) {
       n_out = "ff" + out[:2]
     }
     if val_bytes > 1 {
-      n_out += "fe" + fmt.Sprintf("%02d", hex.EncodedLen(val_bytes)) + out[2:4]
+      n_out += "fe" + fmt.Sprintf("%02x", val_bytes) + out[2:4]
     } else {
       n_out += out[2:4]
     }
@@ -126,9 +137,11 @@ func encodeData(operation, param, value string) {
 }
 
 func checksum(msg string) string {
-  chksum := fmt.Sprintf("%04d", hex.EncodedLen(sum(hexToTuple(msg))))
-  //byte_arr, _ := hex.DecodeString(chksum)
-  return chksum
+  chksum := fmt.Sprintf("%04x", sum(hexToTuple(msg)))
+  byte_array, _ := hex.DecodeString(chksum)
+  ck := fmt.Sprintf("%02x", byte_array[1]) + fmt.Sprintf("%02x", byte_array[0])
+  fmt.Println(ck)
+  return ck
 }
 
 func hexToTuple(msg string) []int64 {
