@@ -49,20 +49,23 @@ func connect() *net.UDPConn {
 }
 
 func send(data string) int {
-  conn := connect()
+  //conn := connect()
   payload := build_headers() + data
   fmt.Println("Payload: "+payload)
   payload = HEADER + payload + checksum(payload)
+  fmt.Printf("payload: %v\n\n", payload)
   bytes, err := hex.DecodeString(payload)
   if err != nil {
     log.Fatalf("Could not decode payload: %v", err)
   }
-  res, err := conn.Write(bytes)
-  fmt.Printf("response: %v", res)
-  if err != nil {
-    log.Fatal(err)
-  }
-  return res
+  fmt.Println(bytes)
+  /*res, err := conn.Write(bytes)*/
+  /*fmt.Printf("response: %v", res)*/
+  /*if err != nil {*/
+    /*log.Fatal(err)*/
+  /*}*/
+  /*return res*/
+  return 1
 }
 
 func receive(conn *net.UDPConn) {
@@ -83,6 +86,7 @@ func build_headers() string {
   pwd_size := get_size("1111")
   id := fmt.Sprintf("%x", "004F00384B435705")
   password := fmt.Sprintf("%x", "1111")
+  fmt.Println(fmt.Sprintf("PWD: %x", "1111"))
   devieType := "02"
   return fmt.Sprintf("%s%s%s%s%s", devieType, id_size, id, pwd_size, password)
 }
