@@ -20,8 +20,13 @@ type Fan struct {
 }
 
 // Create a new Fan
-func NewFan() *Fan {
-	return &Fan{}
+func NewFan(ip_addr, id, pwd string, port int) *Fan {
+	return &Fan{
+    IPAddress: ip_addr,
+    ID: id,
+    Port: port,
+    Password: pwd,
+  }
 }
 
 // Connect to fan
