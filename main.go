@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/hex"
 	"fmt"
 	"log"
@@ -11,14 +10,30 @@ import (
 
 const (
   // Turn on Ventilation
-  on_request = "0001"
+  unit_operation_request = "0001"
   on_value = "01"
 
   // Turn off Ventilation
-  off_request = "0001"
   off_value = "00"
 
+  // Extract air temperature
+  extract_air_temp_request = "0020"
+
+  // Wifi stuff
+  wifi_client_name_request = "0095"
+  wifi_operation_mode_request = "0094"
+  wifi_status_request = "00A1"
+  ip_address_assigned_to_module_request = "00A3"
+
+  // Speed mode
+  speed_mode_request = "0002"
+
+  // All possible functions
   write_return = "03"
+  read = "01"
+  write = "02"
+  inc = "04"
+  dec = "05"
 
   HEADER = "FDFD"
 )
@@ -30,7 +45,8 @@ func main() {
   fmt.Println(fmt.Sprintf("%x", len("004F00384B435705")))
   
   fmt.Println("-----------------------------------")
-  encodeData(write_return, on_request, on_value)
+  //encodeData(write_return, on_request, on_value)
+  encodeData(read, "0093", "")
 }
 
 func connect() *net.UDPConn {
@@ -48,8 +64,7 @@ func connect() *net.UDPConn {
   return conn
 }
 
-func send(data string) int {
-  //conn := connect()
+func send(data string, conn *net.UDPConn) int {
   payload := build_headers() + data
   fmt.Println("Payload: "+payload)
   payload = HEADER + payload + checksum(payload)
@@ -59,26 +74,21 @@ func send(data string) int {
     log.Fatalf("Could not decode payload: %v", err)
   }
   fmt.Println(bytes)
-  /*res, err := conn.Write(bytes)*/
-  /*fmt.Printf("response: %v", res)*/
-  /*if err != nil {*/
-    /*log.Fatal(err)*/
-  /*}*/
-  /*return res*/
-  return 1
-}
-
-func receive(conn *net.UDPConn) {
-  b := make([]byte, 4096)
-  _, err := bufio.NewReader(conn).Read(b)
-  fmt.Println(b)
-
+  res, err := conn.Write(bytes)
   if err != nil {
-    log.Fatalf("Error reading client: %v", err)
-  } else {
-    fmt.Printf("Buff: %v\n", b)
+    log.Fatal(err)
   }
+  
+  buf := make([]byte, 64)
+  _, _ = conn.Read(buf)
 
+  fmt.Println(buf)
+  s := string(buf[25:])
+  s1 := string(buf)
+  fmt.Printf("\n%v\n", s1)
+  fmt.Printf("\n%v\n", s)
+
+  return res
 }
 
 func build_headers() string {
@@ -128,6 +138,8 @@ func encodeData(operation, param, value string) {
       n_out += out[2:4]
     }
 
+    fmt.Printf("Out: %s, Param: %s Out2: %s val_bytes: %d\n", param, out, out[:2], val_bytes)
+
     parameter += n_out + value
     if out == "0077" {
       value = ""
@@ -136,8 +148,7 @@ func encodeData(operation, param, value string) {
 
   data := operation + parameter
   conn := connect()
-  send(data)
-  receive(conn)
+  send(data, conn)
 }
 
 func checksum(msg string) string {
