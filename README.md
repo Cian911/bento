@@ -1,5 +1,9 @@
 # Blauberg Vento Go Client
 
+#### **This Project is currently in development**
+
+Please do not expect anything to work yet.
+
 ### packet Structure
 
 ![Packet Structure](./images/packet-structure.png)
