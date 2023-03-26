@@ -19,10 +19,12 @@ type Fan struct {
   conn *net.UDPConn
 }
 
+// Create a new Fan
 func NewFan() *Fan {
 	return &Fan{}
 }
 
+// Connect to fan
 func (f *Fan) Connect() {
   server, err := net.ResolveUDPAddr(PROTOCOL, fmt.Sprintf("%s:%d", f.IPAddress, f.Port))
   if err != nil {
@@ -37,8 +39,10 @@ func (f *Fan) Connect() {
   f.conn = conn
 }
 
+// Send data to fan
 func (f *Fan) Send() {}
 
+// Receive data from fan
 func (f *Fan) Receive() {}
 
 func (f *Fan) buildRequestHeaders() string {
