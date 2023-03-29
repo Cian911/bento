@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 
 	"github.com/cian911/blauberg-vento/pkg/config"
 	"github.com/cian911/blauberg-vento/pkg/fan"
