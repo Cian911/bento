@@ -15,6 +15,14 @@ const (
   OP_ON = "01"
   OP_OFF = "00"
 
+  // Airflow Operations
+  OP_AIR_OUT = "00"
+  OP_AIR_INVERT = "01"
+  OP_AIR_IN = "02"
+
+  // Airflow Operation Request
+  OP_AIRFLOW_REQUEST = "00B7"
+
   // Unit Operation Request
   OP_UNIT_OPERATION_REQUEST = "0001"
 

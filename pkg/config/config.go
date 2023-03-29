@@ -1,3 +1,5 @@
 package config
 
-func NewConfig() {}
+func ParseConfig() {
+
+}

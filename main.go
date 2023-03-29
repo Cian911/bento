@@ -46,7 +46,7 @@ func main() {
   
   fmt.Println("-----------------------------------")
   //encodeData(write_return, on_request, on_value)
-  encodeData(read, "0093", "")
+  encodeData(write_return, "00B7", "00")
 }
 
 func connect() *net.UDPConn {

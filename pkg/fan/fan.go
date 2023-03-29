@@ -2,6 +2,7 @@ package fan
 
 import (
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -10,45 +11,108 @@ import (
 
 const PROTOCOL = "udp"
 
+type Fans struct {
+  Fans []Fan `yaml:"fans"`
+}
+
 type Fan struct {
-	IPAddress string
-	ID        string
-	Port      int
-	Password  string
+  // Fan IP Address
+  IPAddress string `yaml:"ipaddress"`
+  // Fan unique ID
+  ID        string `yaml:"id"`
+  // Port the fan UDP server runs on - default is 4000
+  Port      int `yaml:"port"`
+  // Fan password
+  Password  string `yaml:"password"`
+  // Name of the fan
+  Name string `yaml:"name"`
 
   conn *net.UDPConn
 }
 
 // Create a new Fan
 func NewFan(ip_addr, id, pwd string, port int) *Fan {
-	return &Fan{
+  fan := &Fan{
     IPAddress: ip_addr,
     ID: id,
     Port: port,
     Password: pwd,
   }
+  fan.connect()
+
+  return fan
+}
+
+// Change fan speed. Possible param values (1..5)
+func (f *Fan) ChangeFanSpeed(speed string) string {
+  data := f.encodedata(OP_WRITE_RETURN_REQUEST, OP_SPEED_MODE_REQUEST, speed)
+  response := f.send(data)
+
+  return response
+}
+
+// Change fan operation mode
+// Possible params are "in, out, invert"
+func (f *Fan) ChangeFanOperation(operation string) string {
+  op := ""
+  switch operation {
+  case "in":
+    op = OP_AIR_IN
+  case "out":
+    op = OP_AIR_OUT
+  case "invert":
+    op = OP_AIR_INVERT
+  default:
+    log.Println("Fan operation not recognised. Defaulting to invert operation.")
+    op = OP_AIR_INVERT 
+  }
+
+  data := f.encodedata(OP_WRITE_RETURN_REQUEST, OP_AIRFLOW_REQUEST, op)
+  response := f.send(data)
+
+  return response
 }
 
 // Connect to fan
-func (f *Fan) Connect() {
+func (f *Fan) connect() {
   server, err := net.ResolveUDPAddr(PROTOCOL, fmt.Sprintf("%s:%d", f.IPAddress, f.Port))
   if err != nil {
-    log.Fatalf("Could not connect to fan (%s) udp server: %v", f.ID, err)
+    log.Fatalf("Could not connect to fan (%s) udp server: %v", f.Name, err)
   }
 
   conn, err := net.DialUDP(PROTOCOL, nil, server)
   if err != nil {
-    log.Fatalf("Could not connect to fan (%s): %v", f.ID, err)
+    log.Fatalf("Could not connect to fan (%s): %v", f.Name, err)
   }
 
   f.conn = conn
 }
 
-// Send data to fan
-func (f *Fan) Send() {}
+// Send and receive data from fan
+func (f *Fan) send(data string) string {
+  payload := f.buildRequestHeaders() + data
+  payload = HEADER + payload + checksum(payload)
+  byteData, err := hex.DecodeString(payload)
 
-// Receive data from fan
-func (f *Fan) Receive() {}
+  if err != nil {
+    log.Fatalf("Could not decode payload data: %v", err)
+  }
+
+  _, err = f.conn.Write(byteData)
+  if err != nil {
+    log.Fatalf("Could not write to fan (%s): %v", f.Name, err)
+  }
+
+  bufferedData := make([]byte, 64)
+  _, err = f.conn.Read(bufferedData)
+  
+  if err != nil {
+    log.Fatalf("Could not read response data from fan (%s): %v", f.Name, err)
+  }
+
+  responseStr := string(bufferedData[25:])
+  return responseStr
+}
 
 func (f *Fan) buildRequestHeaders() string {
   id_size := getSize(f.ID)
@@ -69,7 +133,7 @@ func getSize(str string) string {
   return fmt.Sprintf("%02d", res)
 }
 
-func encodeData(operation, param, value string) string {
+func (f *Fan) encodedata(operation, param, value string) string {
   out := ""
   parameter := ""
   val_bytes := 0
@@ -106,7 +170,10 @@ func encodeData(operation, param, value string) string {
 
 func checksum(msg string) string {
   chksum := fmt.Sprintf("%04x", sum(hexToTuple(msg)))
-  byte_array, _ := hex.DecodeString(chksum)
+  byte_array, err := hex.DecodeString(chksum)
+  if err != nil {
+    log.Fatalf("Could not decode checksum for fan: %v", err)
+  }
   ck := fmt.Sprintf("%02x", byte_array[1]) + fmt.Sprintf("%02x", byte_array[0])
   return ck
 }
@@ -114,11 +181,16 @@ func checksum(msg string) string {
 func hexToTuple(msg string) []int64 {
   result := []int64{}
   val := int64(0)
+  err := errors.New("")
+
   for i := 0; i < len(msg); i += 2 {
     if (i + 2) > len(msg) {
       val = 1
     } else {
-      val, _ = strconv.ParseInt(msg[i : (i + 2)], 16, 16)
+      val, err = strconv.ParseInt(msg[i : (i + 2)], 16, 16)
+      if err != nil {
+        log.Fatalf("Could no convert hex to tuple: %v", err)
+      }
     }
 
     result = append(result, val)

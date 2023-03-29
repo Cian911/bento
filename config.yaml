@@ -1,0 +1,12 @@
+fans:
+  - id: "004F00384B435705"
+    name: "Bedroom"
+    ipaddress: "192.168.0.172"
+    password: "1111"
+    port: 4000
+
+  - id: "001900284B435704"
+    name: "Office"
+    ipaddress: "192.168.0.238"
+    password: "1111"
+    port: 4000
