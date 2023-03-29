@@ -12,20 +12,20 @@ import (
 const PROTOCOL = "udp"
 
 type Fans struct {
-  Fans []Fan `yaml:"fans"`
+  Fans []Fan
 }
 
 type Fan struct {
   // Fan IP Address
-  IPAddress string `yaml:"ipaddress"`
+  IPAddress string
   // Fan unique ID
-  ID        string `yaml:"id"`
+  ID        string
   // Port the fan UDP server runs on - default is 4000
-  Port      int `yaml:"port"`
+  Port      int
   // Fan password
-  Password  string `yaml:"password"`
+  Password  string
   // Name of the fan
-  Name string `yaml:"name"`
+  Name string
 
   conn *net.UDPConn
 }
@@ -38,7 +38,7 @@ func NewFan(ip_addr, id, pwd string, port int) *Fan {
     Port: port,
     Password: pwd,
   }
-  fan.connect()
+  fan.Connect()
 
   return fan
 }
@@ -74,15 +74,15 @@ func (f *Fan) ChangeFanOperation(operation string) string {
 }
 
 // Connect to fan
-func (f *Fan) connect() {
+func (f *Fan) Connect() {
   server, err := net.ResolveUDPAddr(PROTOCOL, fmt.Sprintf("%s:%d", f.IPAddress, f.Port))
   if err != nil {
-    log.Fatalf("Could not connect to fan (%s) udp server: %v", f.Name, err)
+    log.Fatalf("Could not Connect to fan (%s) udp server: %v", f.Name, err)
   }
 
   conn, err := net.DialUDP(PROTOCOL, nil, server)
   if err != nil {
-    log.Fatalf("Could not connect to fan (%s): %v", f.Name, err)
+    log.Fatalf("Could not Connect to fan (%s): %v", f.Name, err)
   }
 
   f.conn = conn
