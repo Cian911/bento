@@ -36,25 +36,19 @@ func main() {
 	/* f2 := fans[1] */
 	/* f2.ChangeFanSpeed(HIGH_SPEED) */
 
-	c := influxClient.NewClient("http://192.168.0.172:8086", fmt.Sprintf("%s:%s", "root", "password"))
+	c := influxClient.NewClient("http://192.168.0.172:8086", fmt.Sprintf("%s:%s", "user", "password"))
 	queryApi := c.QueryAPI("")
-	_, err := queryApi.Query(context.Background(), `from(bucket:"Co2Data")|> range(start: -15s)`)
-	/* if err == nil { */
-	/*   for result.Next() { */
-	/*     if result.TableChanged() { */
-	/*       fmt.Printf("table: %s\n", result.TableMetadata().String()) */
-	/*     } */
-	/*  */
-	/*     fmt.Printf("row: %s\n", result.Record().String()) */
-	/*   } */
-	/*   if result.Err() != nil { */
-	/*     fmt.Printf("Query error: %s\n", result.Err().Error()) */
-	/*   } */
-	/* } else { */
-	/*   panic(err) */
-	/* } */
-
-	fmt.Printf("Error: %v", err)
+	result, err := queryApi.Query(context.Background(), `from(bucket:"flink_home")|> range(start: -15s) |> filter(fn: (r) => r._measurement == "Co2Data") |> filter(fn: (r) => r._field == "co2")`)
+	if err == nil {
+		for result.Next() {
+			fmt.Printf("row: %v\n", result.Record().Value())
+		}
+		if result.Err() != nil {
+			fmt.Printf("Query error: %s\n", result.Err().Error())
+		}
+	} else {
+		panic(err)
+	}
 
 	c.Close()
 }
