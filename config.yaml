@@ -7,6 +7,7 @@ stream:
     database: "flink_home"
     measurement: "Co2Data"
     field: "co2"
+    interval: 15
 
 fans:
   - id: "004F00384B435705"

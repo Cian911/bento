@@ -15,11 +15,12 @@ type InfluxDbClient struct {
 	Database    string
 	Measurement string
 	Field       string
+	Interval    int
 
 	c influxdb2.Client
 }
 
-func NewClient(url, token, database, measurement, field string, port int) *InfluxDbClient {
+func NewClient(url, token, database, measurement, field string, port, interval int) *InfluxDbClient {
 	client := &InfluxDbClient{
 		Url:         url,
 		Token:       token,
@@ -27,6 +28,7 @@ func NewClient(url, token, database, measurement, field string, port int) *Influ
 		Database:    database,
 		Measurement: measurement,
 		Field:       field,
+		Interval:    interval,
 	}
 	client.c = influxdb2.NewClient(
 		fmt.Sprintf("%s:%d", client.Url, client.Port),
@@ -41,7 +43,7 @@ func (i *InfluxDbClient) QueryCo2Field() interface{} {
 
 	result, err := queryApi.Query(
 		context.Background(),
-		fmt.Sprintf(`from(bucket:"%s")|> range(start: -15s) |> filter(fn: (r) => r._measurement == "%s") |> filter(fn: (r) => r._field == "%s")`, i.Database, i.Measurement, i.Field),
+		fmt.Sprintf(`from(bucket:"%s")|> range(start: -%ds) |> filter(fn: (r) => r._measurement == "%s") |> filter(fn: (r) => r._field == "%s")`, i.Database, i.Interval, i.Measurement, i.Field),
 	)
 
 	if err != nil {
