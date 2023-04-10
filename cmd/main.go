@@ -1,11 +1,13 @@
 package main
 
 import (
-	"context"
 	"flag"
-	"fmt"
+	"log"
+	"time"
 
-	influxClient "github.com/influxdata/influxdb-client-go/v2"
+	"github.com/cian911/blauberg-vento/pkg/config"
+	"github.com/cian911/blauberg-vento/pkg/fan"
+	"github.com/cian911/blauberg-vento/pkg/influxdb"
 )
 
 const (
@@ -19,36 +21,26 @@ var configFile string
 func main() {
 	flag.StringVar(&configFile, "config", "", "Path to config file to parse.")
 	flag.Parse()
+  parsedConfig := config.ParseConfig(configFile)
+  stream := influxdb.NewClient(parsedConfig.S)
 
-	/*  yamlFans := config.ParseConfig(configFile) */
-	/* var fans []*fan.Fan */
-	/* for _, v := range yamlFans.Fans { */
-	/*   f := fan.NewFan( */
-	/*     v.IPAddress, */
-	/*     v.ID, */
-	/*     v.Password, */
-	/*     v.Port, */
-	/*   ) */
-	/*   fans = append(fans, f) */
-	/* } */
-	/*  */
-	/* // Test fan is connected and working */
-	/* f2 := fans[1] */
-	/* f2.ChangeFanSpeed(HIGH_SPEED) */
+  var fans []*fan.Fan 
+  for _, v := range parsedConfig.F.Fans { 
+    f := fan.NewFan( 
+      v.IPAddress, 
+      v.ID, 
+      v.Password, 
+      v.Port, 
+    ) 
+    fans = append(fans, f) 
+  } 
+    
+  // Test fan is connected and working 
+  //f2 := fans[1] 
+  //f2.ChangeFanSpeed(HIGH_SPEED) 
+  
+  // Poll stream every 5 seconds to get co2 data
 
-	c := influxClient.NewClient("http://192.168.0.172:8086", fmt.Sprintf("%s:%s", "user", "password"))
-	queryApi := c.QueryAPI("")
-	result, err := queryApi.Query(context.Background(), `from(bucket:"flink_home")|> range(start: -15s) |> filter(fn: (r) => r._measurement == "Co2Data") |> filter(fn: (r) => r._field == "co2")`)
-	if err == nil {
-		for result.Next() {
-			fmt.Printf("row: %v\n", result.Record().Value())
-		}
-		if result.Err() != nil {
-			fmt.Printf("Query error: %s\n", result.Err().Error())
-		}
-	} else {
-		panic(err)
-	}
-
-	c.Close()
 }
+
+
