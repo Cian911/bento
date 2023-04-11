@@ -11,10 +11,6 @@ import (
 
 const PROTOCOL = "udp"
 
-type Fans struct {
-	Fans []Fan
-}
-
 type Fan struct {
 	// Fan IP Address
 	IPAddress string
@@ -26,6 +22,8 @@ type Fan struct {
 	Password string
 	// Name of the fan
 	Name string
+	// IsWorking sets the state of the fan
+	IsWorking bool
 
 	conn *net.UDPConn
 }

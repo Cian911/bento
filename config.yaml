@@ -1,14 +1,13 @@
-stream:
-  influxdb:
-    url: "http://192.168.0.172"
-    port: 8086
-    username: "user"
-    password: "password"
-    database: "flink_home"
-    measurement: "Co2Data"
-    field: "co2"
-    interval: 5
-    threshold: 800
+influxdb:
+  url: "http://192.168.0.172"
+  port: 8086
+  username: "user"
+  password: "password"
+  database: "flink_home"
+  measurement: "Co2Data"
+  field: "co2"
+  interval: 20
+  threshold: 800
 
 fans:
   - id: "004F00384B435705"

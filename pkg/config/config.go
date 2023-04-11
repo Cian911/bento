@@ -9,31 +9,31 @@ import (
 )
 
 type Config struct {
-  F fan.Fans
-  S influxdb.InfluxDbClient
+	I influxdb.InfluxdbClient `mapstructure:"influxdb"`
+	F []fan.Fan               `mapstructure:"fans"`
 }
 
 func ParseConfig(configFile string) Config {
-  viper.SetConfigFile(configFile)
-  var c Config
+	viper.SetConfigFile(configFile)
+	var c Config
 
-  if err := viper.ReadInConfig(); err == nil {
-    log.Println("Using config file: ", viper.ConfigFileUsed())
+	if err := viper.ReadInConfig(); err == nil {
+		log.Println("Using config file: ", viper.ConfigFileUsed())
 
-    err := viper.Unmarshal(&c)
+		err := viper.Unmarshal(&c)
 
-    if err != nil {
-      log.Fatalf("Unable to decode config file. Please check data is in the correct format: %v", err)
-    }
+		if err != nil {
+			log.Fatalf("Unable to decode config file. Please check data is in the correct format: %v", err)
+		}
 
-    if c.F.Fans == nil || len(c.F.Fans) == 0 {
-      log.Fatalf("Unable to decode config file. Please check data is in the correct format: %v", c.F.Fans)
-    }
+		/* if c.F.Fans == nil || len(c.F.Fans) == 0 { */
+		/* log.Fatalf("Unable to decode config file. Please check data is in the correct format: %v", c.F.Fans) */
+		/* } */
 
-    if c.S.Url == "" {
-      log.Fatal("Unable to decode config file. Please check data is in the correct format.")
-    }
-  }
+		/*    if c.S.Url == "" { */
+		/* log.Fatal("Unable to decode config file. Please check data is in the correct format.") */
+		/* } */
+	}
 
-  return c
+	return c
 }

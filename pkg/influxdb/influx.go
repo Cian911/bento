@@ -10,7 +10,7 @@ import (
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 )
 
-type InfluxDbClient struct {
+type InfluxdbClient struct {
 	Url         string
 	Token       string
 	Port        int
@@ -23,7 +23,7 @@ type InfluxDbClient struct {
 	c influxdb2.Client
 }
 
-func NewClient(client InfluxDbClient) *InfluxDbClient {
+func NewClient(client InfluxdbClient) *InfluxdbClient {
 	client.c = influxdb2.NewClient(
 		fmt.Sprintf("%s:%d", client.Url, client.Port),
 		fmt.Sprintf("%s", client.Token),
@@ -32,7 +32,7 @@ func NewClient(client InfluxDbClient) *InfluxDbClient {
 	return &client
 }
 
-func (i *InfluxDbClient) QueryField() interface{} {
+func (i *InfluxdbClient) QueryField() interface{} {
 	queryApi := i.c.QueryAPI("")
 
 	result, err := queryApi.Query(
@@ -48,29 +48,30 @@ func (i *InfluxDbClient) QueryField() interface{} {
 		log.Fatalf("InfluxDB query error: %v", result.Err())
 	}
 
-  i.c.Close()
+	// i.c.Close()
+	fmt.Printf("Result: %v", result.Record().Value())
 
-	for result.Next() {
-		return result.Record().Value()
-	}
-
-	return nil
+	return result.Record().Value()
 }
 
-func (i *InfluxDbClient) Poll(f fan.Fan) {
-  go func() {
-    ticker := time.NewTicker(time.Duration(i.Interval) * time.Second)
-    for {
-      select {
-      case <-ticker.C:
-        log.Println("Polling...")
-        co2level := i.QueryField().(int)
-        
-        if co2level >= i.Threshold {
-          log.Println("Threshold meet, turning fans to full for 5 minutes.")
-          f.ChangeFanSpeed("03")
-        }
-      }
-    }
-  }()
+func (i *InfluxdbClient) Poll(f *fan.Fan) {
+	go func() {
+		ticker := time.NewTicker(time.Duration(i.Interval) * time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				log.Println("Polling...")
+				co2level := i.QueryField().(float64)
+				log.Printf("Level: %v\n", co2level)
+
+				/* if co2level >= i.Threshold && !f.IsWorking { */
+				/*   log.Println("Threshold meet, turning fans to full for 5 minutes.") */
+				/*   f.IsWorking = true */
+				/*   f.ChangeFanSpeed("03") */
+				/* } else { */
+				/*   f.IsWorking = false */
+				/* } */
+			}
+		}
+	}()
 }
