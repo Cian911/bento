@@ -48,10 +48,13 @@ func (i *InfluxdbClient) QueryField() interface{} {
 		log.Fatalf("InfluxDB query error: %v", result.Err())
 	}
 
-	// i.c.Close()
-	fmt.Printf("Result: %v", result.Record().Value())
+	i.c.Close()
 
-	return result.Record().Value()
+	for result.Next() {
+		return result.Record().Value()
+	}
+
+	return nil
 }
 
 func (i *InfluxdbClient) Poll(f *fan.Fan) {
@@ -61,16 +64,21 @@ func (i *InfluxdbClient) Poll(f *fan.Fan) {
 			select {
 			case <-ticker.C:
 				log.Println("Polling...")
-				co2level := i.QueryField().(float64)
+				co2level := i.QueryField()
 				log.Printf("Level: %v\n", co2level)
 
-				/* if co2level >= i.Threshold && !f.IsWorking { */
-				/*   log.Println("Threshold meet, turning fans to full for 5 minutes.") */
-				/*   f.IsWorking = true */
-				/*   f.ChangeFanSpeed("03") */
-				/* } else { */
-				/*   f.IsWorking = false */
-				/* } */
+				if co2level != nil {
+					level := int(co2level.(float64))
+
+					if level >= i.Threshold && !f.IsWorking {
+						log.Println("Threshold meet, turning fans to full for 5 minutes.")
+						f.IsWorking = true
+						f.ChangeFanSpeed("03")
+					} else {
+						fmt.Println("Threshold not metting.")
+						f.IsWorking = false
+					}
+				}
 			}
 		}
 	}()
