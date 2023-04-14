@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"time"
 )
 
 const PROTOCOL = "udp"
@@ -24,19 +25,24 @@ type Fan struct {
 	Name string
 	// IsWorking sets the state of the fan
 	IsWorking bool
+	// Maxed Timeout is the time in seconds the fans will run at max when triggered
+	MaxedTimeout int
 
 	conn *net.UDPConn
 }
 
 // Create a new Fan
-func NewFan(ip_addr, id, pwd string, port int) *Fan {
+func NewFan(ip_addr, id, pwd, name string, port, maxedTimeout int) *Fan {
 	fan := &Fan{
-		IPAddress: ip_addr,
-		ID:        id,
-		Port:      port,
-		Password:  pwd,
+		IPAddress:    ip_addr,
+		ID:           id,
+		Port:         port,
+		Password:     pwd,
+		Name:         name,
+		MaxedTimeout: maxedTimeout,
 	}
 	fan.Connect()
+	log.Printf("Fan: %v", fan)
 
 	return fan
 }
@@ -84,6 +90,26 @@ func (f *Fan) Connect() {
 	}
 
 	f.conn = conn
+}
+
+func (f *Fan) PollMaxedTimeout() {
+	timeInFuture := time.Now().Add(time.Duration(f.MaxedTimeout) * time.Second).Unix()
+	go func() {
+		// Set the polling period to MaxedTimeout
+		ticker := time.NewTicker(time.Duration(f.MaxedTimeout) * time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				log.Println("MaxedTimeout Polling...")
+
+				if time.Now().Unix() >= timeInFuture {
+					log.Printf("MaxedTimeout complete for fan %s. Reducing speed.", f.Name)
+					f.ChangeFanSpeed(LOW_SPEED)
+					f.IsWorking = false
+				}
+			}
+		}
+	}()
 }
 
 // Send and receive data from fan

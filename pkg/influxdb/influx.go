@@ -71,12 +71,11 @@ func (i *InfluxdbClient) Poll(f *fan.Fan) {
 					level := int(co2level.(float64))
 
 					if level >= i.Threshold && !f.IsWorking {
-						log.Println("Threshold meet, turning fans to full for 5 minutes.")
+						log.Printf("Threshold met. turning fans to full for %d seconds\n", f.MaxedTimeout)
 						f.IsWorking = true
-						f.ChangeFanSpeed("03")
-					} else {
-						fmt.Println("Threshold not metting.")
-						f.IsWorking = false
+						f.PollMaxedTimeout()
+
+						f.ChangeFanSpeed(fan.HIGH_SPEED)
 					}
 				}
 			}

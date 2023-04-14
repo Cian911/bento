@@ -9,12 +9,6 @@ import (
 	"github.com/cian911/blauberg-vento/pkg/influxdb"
 )
 
-const (
-	LOW_SPEED  = "01"
-	MID_SPEED  = "02"
-	HIGH_SPEED = "03"
-)
-
 var configFile string
 
 func main() {
@@ -29,7 +23,9 @@ func main() {
 			v.IPAddress,
 			v.ID,
 			v.Password,
+			v.Name,
 			v.Port,
+			v.MaxedTimeout,
 		)
 		fans = append(fans, f)
 	}

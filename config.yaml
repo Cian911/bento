@@ -15,9 +15,11 @@ fans:
     ipaddress: "192.168.0.172"
     password: "1111"
     port: 4000
+    maxedtimeout: 60
 
   - id: "001900284B435704"
     name: "Office"
     ipaddress: "192.168.0.238"
     password: "1111"
     port: 4000
+    maxedtimeout: 60
