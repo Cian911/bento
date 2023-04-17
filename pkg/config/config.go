@@ -3,27 +3,37 @@ package config
 import (
 	"log"
 
-	"github.com/spf13/viper"
 	"github.com/cian911/blauberg-vento/pkg/fan"
+	"github.com/cian911/blauberg-vento/pkg/influxdb"
+	"github.com/spf13/viper"
 )
 
-func ParseConfig(configFile string) fan.Fans {
-  viper.SetConfigFile(configFile)
-  var fans fan.Fans
+type Config struct {
+	I influxdb.InfluxdbClient `mapstructure:"influxdb"`
+	F []fan.Fan               `mapstructure:"fans"`
+}
 
-  if err := viper.ReadInConfig(); err == nil {
-    log.Println("Using config file: ", viper.ConfigFileUsed())
+func ParseConfig(configFile string) Config {
+	viper.SetConfigFile(configFile)
+	var c Config
 
-    err := viper.Unmarshal(&fans)
+	if err := viper.ReadInConfig(); err == nil {
+		log.Println("Using config file: ", viper.ConfigFileUsed())
 
-    if err != nil {
-      log.Fatalf("Unable to decode config file. Please check data is in the correct format: %v", err)
-    }
+		err := viper.Unmarshal(&c)
 
-    if fans.Fans == nil || len(fans.Fans) == 0 {
-      log.Fatalf("Unable to decode config file. Please check data is in the correct format: %v", fans.Fans)
-    }
-  }
+		if err != nil {
+			log.Fatalf("Unable to decode config file. Please check data is in the correct format: %v", err)
+		}
 
-  return fans
+		if c.F == nil || len(c.F) == 0 {
+			log.Fatalf("Unable to decode config file. Please check data is in the correct format: %v", c.F)
+		}
+
+		if c.I.Url == "" {
+			log.Fatal("Unable to decode config file. Please check data is in the correct format.")
+		}
+	}
+
+	return c
 }

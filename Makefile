@@ -1,4 +1,4 @@
-.PHONY: build build-arm build-debian run
+.PHONY: build build-arm build-debian run build-run
 
 VERSION := test-build
 BUILD := $$(git log -1 --pretty=%h)
@@ -19,4 +19,6 @@ build-arm:
 		-ldflags "-X main.Version=${VERSION} -X main.Build=${BUILD} -X main.BuildTime=${BUILD_TIME}" \
 		-o ./bin/bento ./cmd
 run:
-	@go run ./cmd/main.go
+	@go run ./cmd/main.go -config config.yaml
+
+build-run: build run

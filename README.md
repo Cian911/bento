@@ -1,29 +1,39 @@
-# Blauberg Vento Go Client
+# Blauberg Vento Go Client & Co2 Monitor
 
-#### **This Project is currently in development**
+### Description
 
-Please do not expect anything to work yet.
+Bento is a Go client to communicate and control the set of [Blauberg Vento A*](https://blaubergventilatoren.de/en/series/vento-expert-a50-1-w) smart fans. In addition, this project has the capability to connect to an InfluxDB source, and automate your fans given queried from it. 
 
-### packet Structure
+This project is made in conjunction with the [Flink Home](https://github.com/Cian911/flink-home) custom Co2 sensor project by [@Cian911](https://github.com/Cian911). If you're interested in building your own sensor, and setting up a real-time pipeline behind it, please visit the project.
 
-![Packet Structure](./images/packet-structure.png)
 
-`0xFD|0xFD` denote the beginning of the packet to be sent. This means the first two bytes in the code will look like `FDFD`, hence why this is predefined already.
+### Installation
 
-`TYPE` denotes the *protocol type*. This is set to `0x02` or just `02` in the Go code.
+This project is ideally intended to be forked and used as reference in your own fan home automation project, but should you wish to download and test it out by using your own config file (please see the sample for reference) you can download and run a binary by doing the following.
 
-`SIZE ID` denotes the ID block size. This can be calculated by taking the length of your device ID and then returning the hexadecimal representation of it. As example, take the following id `014F10324C425708`. The length of this is 16 characters, and the hexadecimal respresentation of this is `0x10`, or in our case just `10`.
+**Manually**
 
-`ID` denotes the ID number printed on the label of the Blauberg Vento, this is 16 characters. You can also substitute the ID with `DEFAULT_DEVICEID` code word. In hexadecimal this would look like `44454641554c545f4445564943454944`
+```bash
+curl https://github.com/Cian911/bento/releases/download/${VERSION}/${PACKAGE_NAME} -o ${PACKAGE_NAME}
+sudo tar -xvf ${PACKAGE_NAME} -C /usr/local/bin/
+sudo chmod +x /usr/local/bin/bento
+```
+**Docker**
 
-`SIZE PWD` denotes the password block size (1 byte). Say your password is `2222` as example, In hexadecimal the value would be `3204`.
+```bash
+docker pull ghcr.io/cian911/bento:${VERSION}
 
-`PWD` denotes the device password. The default value is `1111`. The hexadeciaml encoding of this would look like `31313131`.
+docker run -d ghcr.io/cian911/bento:${VERSION} -config config.yaml
+```
 
-`FUNC` defines the number of the action being taken with the data and the `DATA` block structure. Example of functions are:
-  - `0x01` paramter read
-  - `0x02` paramter write. The controller does not send any response regarding the status of the message.
-  - `0x03` paramter write with controller response regarding stauts of message.
-  - `0x04` paramter increment with controller response
-  - `0x05` paramter decrement with controller response
-  - `0x06` controller response to the request (FUNC = `0x01, 0x03, 0x04, 0x05`)
+### Quick Start
+
+Please see the [sample config](./sample_config.yml) for reference. Once configured, you can pass in the config file and run the binary like so:
+
+```bash
+bento -config config.yml
+```
+
+### Bento Technical Details
+
+Each fan runs a UDP server which we can communicate with. For further details on how the fans operate and how we communicate with them, please visit our [wiki](https://github.com/Cian911/bento/wiki/Blauberg-Vento-Packet-Structure) details the packet structure and communication parameters.

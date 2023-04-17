@@ -1,0 +1,18 @@
+influxdb:
+  url: "http://192.168.0.1"
+  port: 8086
+  username: "user"
+  password: "password"
+  database: "database"
+  measurement: "YourMeasurement"
+  field: "field"
+  interval: 20
+  threshold: 600
+
+fans:
+  - id: "1234567"
+    name: "Office"
+    ipaddress: "192.168.0.2"
+    password: "1111"
+    port: 4000
+    maxedtimeout: 60

@@ -1,12 +1,25 @@
+influxdb:
+  url: "http://192.168.0.172"
+  port: 8086
+  username: "user"
+  password: "password"
+  database: "flink_home"
+  measurement: "Co2Data"
+  field: "co2"
+  interval: 18
+  threshold: 600
+
 fans:
   - id: "004F00384B435705"
     name: "Bedroom"
     ipaddress: "192.168.0.172"
     password: "1111"
     port: 4000
+    maxedtimeout: 60
 
   - id: "001900284B435704"
     name: "Office"
     ipaddress: "192.168.0.238"
     password: "1111"
     port: 4000
+    maxedtimeout: 60
