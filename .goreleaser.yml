@@ -1,0 +1,103 @@
+before:
+  hooks:
+    - go mod download
+builds:
+-
+  main: ./cmd/main.go
+  ldflags:
+    - -s -w
+    - -X main.Version={{ .Version }}
+    - -X main.Build={{ .Commit }}
+    - -X main.BuildDate={{ .Date }}
+    - -X main.License={{ .Date }}
+  goos:
+    - linux
+    - windows
+    - darwin
+  goarch:
+    - amd64
+    - arm
+    - arm64
+    - 386
+    - riscv64
+  goarm:
+    - 5
+    - 6
+    - 7
+dockers:
+-
+  image_templates: ["ghcr.io/cian911/{{ .ProjectName }}:{{ .Version }}"]
+  dockerfile: Dockerfile
+  use: buildx
+  build_flag_templates:
+  - --platform=linux/amd64
+  - --label=org.opencontainers.image.title={{ .ProjectName }}
+  - --label=org.opencontainers.image.description={{ .ProjectName }}
+  - --label=org.opencontainers.image.url=https://github.com/cian911/{{ .ProjectName }}
+  - --label=org.opencontainers.image.source=https://github.com/cian911/{{ .ProjectName }}
+  - --label=org.opencontainers.image.version={{ .Version }}
+  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+  - --label=org.opencontainers.image.revision={{ .FullCommit }}
+  - --label=org.opencontainers.image.licenses=GPL-3.0
+archives:
+-
+  id: bento
+  replacements:
+    darwin: Darwin
+    linux: Linux
+    windows: Windows
+    386: i386
+    amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}"
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+    - '^typo|TYPO'
+    - typo
+    - Merge pull request
+    - Merge remote-tracking branch
+    - Merge branch
+  groups:
+    - title: 'New Features'
+      regexp: "^.*feat|watcher|cli|event|utils|cmd[(\\w)]*:+.*$"
+      order: 0
+    - title: 'Fixes'
+      order: 10
+      regexp: "^.*fix|chore|bugfix|examples|bug[(\\w)]*:+.*$"
+    - title: 'Workflow Updates'
+      regexp: "^.*actions|action[(\\w)]*:+.*$"
+      order: 20
+    - title: 'Other things'
+      order: 999
+nfpms:
+-
+  replacements:
+    amd64: 64-bit
+    386: 32-bit
+    darwin: macOS
+    linux: linux
+  vendor: Cian911
+  formats:
+    - deb
+    - rpm
+    - apk
+brews:
+  -
+    goarm: 6
+    tap:
+      owner: Cian911
+      name: homebrew-bento
+    folder: Formula
+    commit_author:
+      name: Cian911
+      email: cian@ciangallagher.net
+    homepage: https://github.com/Cian911/bento
+    description: |
+      TBD

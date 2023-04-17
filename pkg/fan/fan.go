@@ -42,7 +42,6 @@ func NewFan(ip_addr, id, pwd, name string, port, maxedTimeout int) *Fan {
 		MaxedTimeout: maxedTimeout,
 	}
 	fan.Connect()
-	log.Printf("Fan: %v", fan)
 
 	return fan
 }

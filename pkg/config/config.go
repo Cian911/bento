@@ -26,13 +26,13 @@ func ParseConfig(configFile string) Config {
 			log.Fatalf("Unable to decode config file. Please check data is in the correct format: %v", err)
 		}
 
-		/* if c.F.Fans == nil || len(c.F.Fans) == 0 { */
-		/* log.Fatalf("Unable to decode config file. Please check data is in the correct format: %v", c.F.Fans) */
-		/* } */
+		if c.F == nil || len(c.F) == 0 {
+			log.Fatalf("Unable to decode config file. Please check data is in the correct format: %v", c.F)
+		}
 
-		/*    if c.S.Url == "" { */
-		/* log.Fatal("Unable to decode config file. Please check data is in the correct format.") */
-		/* } */
+		if c.I.Url == "" {
+			log.Fatal("Unable to decode config file. Please check data is in the correct format.")
+		}
 	}
 
 	return c
