@@ -36,4 +36,6 @@ bento -config config.yml
 
 ### Bento Technical Details
 
+![Fan Packet Structure](./images/packet-structure.png)
+
 Each fan runs a UDP server which we can communicate with. For further details on how the fans operate and how we communicate with them, please visit our [wiki](https://github.com/Cian911/bento/wiki/Blauberg-Vento-Packet-Structure) details the packet structure and communication parameters.

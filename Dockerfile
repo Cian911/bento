@@ -1,4 +1,4 @@
-FROM alpine
+FROM busybox:latest
 
 COPY bento /usr/local/bin/bento
 
