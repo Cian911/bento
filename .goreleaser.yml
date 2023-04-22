@@ -94,7 +94,7 @@ brews:
     goarm: 6
     tap:
       owner: Cian911
-      name: homebrew-bento
+      name: bento-homebrew
     folder: Formula
     commit_author:
       name: Cian911
