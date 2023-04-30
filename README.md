@@ -1,5 +1,9 @@
 # Blauberg Vento Go Client & Co2 Monitor
 
+<p align="center">
+  <img style="float: right;" src="images/vento.png" alt="Blauberg Vento Fan"/>
+</p>
+
 ### Description
 
 Bento is a Go client to communicate and control the set of [Blauberg Vento A*](https://blaubergventilatoren.de/en/series/vento-expert-a50-1-w) smart fans. In addition, this project has the capability to connect to an InfluxDB source, and automate your fans given queried from it. 
