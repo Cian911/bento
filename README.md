@@ -1,4 +1,4 @@
-# Blauberg Vento Go Client & Co2 Monitor
+# Blauberg Vento Go Client
 
 <p align="center">
   <img style="float: right;width:400px;height:400px;" src="images/vento.png" alt="Blauberg Vento Fan"/>
