@@ -46,7 +46,7 @@ dockers:
   goarch: arm64
   use: docker
   build_flag_templates:
-  - --platform=linux/arm64/v7
+  - --platform=linux/arm64
   - --label=org.opencontainers.image.title={{ .ProjectName }}
   - --label=org.opencontainers.image.description={{ .ProjectName }}
   - --label=org.opencontainers.image.url=https://github.com/cian911/{{ .ProjectName }}
