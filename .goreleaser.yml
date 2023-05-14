@@ -43,6 +43,7 @@ dockers:
 -
   image_templates: ["ghcr.io/cian911/{{ .ProjectName }}:{{ .Version }}-arm64"]
   dockerfile: Dockerfile
+  goarch: arm64
   use: docker
   build_flag_templates:
   - --platform=linux/arm64/v7
